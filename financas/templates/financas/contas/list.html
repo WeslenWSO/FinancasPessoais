@@ -1,0 +1,28 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Contas</h2><p>Contas correntes, poupança, dinheiro e carteiras digitais</p></div>
+    <button class="btn" hx-get="{% url 'entity_form' 'conta' %}" hx-target="#modal">+ Nova conta</button>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Nome</th><th>Tipo</th><th class="num">Saldo inicial</th><th class="num">Saldo atual</th><th></th></tr></thead>
+      <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.conta.nome }}</td>
+        <td>{{ row.conta.tipo }}</td>
+        <td class="num">{{ row.conta.saldo_inicial|money }}</td>
+        <td class="num {{ row.saldo|money_class }}">{{ row.saldo|money }}</td>
+        <td class="actions-cell"><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'conta' row.conta.pk %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="empty-msg">Nenhuma conta cadastrada ainda.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

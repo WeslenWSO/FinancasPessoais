@@ -1,0 +1,21 @@
+<h3>{{ title }}</h3>
+<form method="post"
+      hx-post="{% if instance %}{% url 'entity_form_edit' entity instance.pk %}{% else %}{% url 'entity_form' entity %}{% endif %}"
+      hx-target="#modal">
+  {% csrf_token %}
+  {% for field in form %}
+  <div class="field">
+    <label>{{ field.label }}</label>
+    {{ field }}
+    {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+  </div>
+  {% endfor %}
+  <div class="modal-actions">
+    {% if instance %}
+    <button type="submit" formaction="{% url 'entity_delete' entity instance.pk %}" formmethod="post" class="btn danger"
+            hx-post="{% url 'entity_delete' entity instance.pk %}" hx-confirm="Excluir este registro?">Excluir</button>
+    {% endif %}
+    <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+    <button type="submit" class="btn">Salvar</button>
+  </div>
+</form>

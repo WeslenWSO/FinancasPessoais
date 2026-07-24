@@ -1,0 +1,55 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Previsão</h2><p>Projeção mês a mês com base em fixos, orçamento e parcelas</p></div>
+  </div>
+  <div class="panel">
+    <div class="pagehead" style="margin-bottom:6px;">
+      <div><h3 style="margin:0;">Orçamento planejado por categoria</h3></div>
+      <button class="btn small" hx-get="{% url 'entity_form' 'orcamento' %}" hx-target="#modal">+ Criar orçamento</button>
+    </div>
+    <form class="toolbar" method="get"><input type="month" name="mes" value="{{ ym }}" onchange="this.form.submit()"></form>
+    <table>
+      <thead><tr><th>Categoria</th><th class="num">Planejado</th><th class="num">Gasto no mês</th><th></th></tr></thead>
+      <tbody>
+      {% for o in orcamentos %}
+      <tr>
+        <td>{{ o.orcamento.categoria.nome }}</td>
+        <td class="num">{{ o.planejado|money }}</td>
+        <td class="num {% if o.estourou %}neg{% endif %}">{{ o.gasto|money }}</td>
+        <td><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'orcamento' o.orcamento.pk %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="empty-msg">Nenhum orçamento criado ainda.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="panel wide-table-panel">
+    <h3>Projeção — próximos 12 meses</h3>
+    <div class="table-scroll-hint">Deslize horizontalmente para ver todas as colunas</div>
+    <div class="table-scroll-wrap">
+    <table>
+      <thead><tr><th>Mês</th><th class="num">Saldo inicial</th><th class="num">Rec. fixas</th><th class="num">Rec. var.</th><th class="num">Desp. fixas</th><th class="num">Faturas</th><th class="num">Total despesas</th><th class="num">Saldo mês</th><th class="num">Saldo acum.</th></tr></thead>
+      <tbody>
+      {% for l in linhas %}
+      <tr>
+        <td>{{ l.ym }}</td>
+        <td class="num">{{ l.saldo_inicial_mes|money }}</td>
+        <td class="num pos">{{ l.receitas_fix|money }}</td>
+        <td class="num pos">{{ l.receitas_var_reais|money }}</td>
+        <td class="num neg">{{ l.despesas_fix|money }}</td>
+        <td class="num neg">{{ l.faturas_cartao|money }}</td>
+        <td class="num neg"><strong>{{ l.total_despesas|money }}</strong></td>
+        <td class="num {{ l.saldo_mes|money_class }}">{{ l.saldo_mes|money }}</td>
+        <td class="num {{ l.saldo_acumulado|money_class }}">{{ l.saldo_acumulado|money }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

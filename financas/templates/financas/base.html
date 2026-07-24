@@ -1,0 +1,105 @@
+{% load static financas_extras %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+  <meta name="theme-color" content="#111a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>{% block title %}Finanças Pessoais{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'financas/css/app.css' %}">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<button id="hamburger-btn" type="button" onclick="toggleSidebar()" aria-label="Abrir menu">&#9776;</button>
+<div id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+<header class="mobile-topbar" id="mobile-topbar">
+  <div class="mobile-topbar-title">{{ page_title }}</div>
+  <div class="mobile-topbar-saldo">{{ sidebar_saldo|money }}</div>
+</header>
+<div id="sidebar">
+  <div class="brand">
+    <h1>Finanças Pessoais</h1>
+    <small>servidor &middot; multi-usuário</small>
+  </div>
+  <div class="saldo-mini">
+    <div class="lbl">Saldo total hoje</div>
+    <div class="val" id="mini-saldo">{{ sidebar_saldo|money }}</div>
+  </div>
+  <nav class="menu">
+    <a href="{% url 'dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}"><span class="ico">&#9673;</span> Dashboard</a>
+    <a href="{% url 'contas_list' %}" class="{% if active_nav == 'contas' %}active{% endif %}"><span class="ico">&#9776;</span> Contas</a>
+    <a href="{% url 'cartoes_list' %}" class="{% if active_nav == 'cartoes' %}active{% endif %}"><span class="ico">&#9724;</span> Cartões</a>
+    <a href="{% url 'faturas' %}" class="{% if active_nav == 'faturas' %}active{% endif %}"><span class="ico">&#128196;</span> Faturas</a>
+    <a href="{% url 'categorias_list' %}" class="{% if active_nav == 'categorias' %}active{% endif %}"><span class="ico">&#9673;</span> Categorias</a>
+    <a href="{% url 'receitas_list' %}" class="{% if active_nav == 'receitas' %}active{% endif %}"><span class="ico">&#8593;</span> Receitas</a>
+    <a href="{% url 'despesas_list' %}" class="{% if active_nav == 'despesas' %}active{% endif %}"><span class="ico">&#8595;</span> Despesas</a>
+    <a href="{% url 'investimentos_list' %}" class="{% if active_nav == 'investimentos' %}active{% endif %}"><span class="ico">&#9733;</span> Investimentos</a>
+    <a href="{% url 'bens_list' %}" class="{% if active_nav == 'bens' %}active{% endif %}"><span class="ico">&#127968;</span> Bens</a>
+    <a href="{% url 'previsao' %}" class="{% if active_nav == 'previsao' %}active{% endif %}"><span class="ico">&#8596;</span> Previsão</a>
+    <a href="{% url 'backup' %}" class="{% if active_nav == 'backup' %}active{% endif %}"><span class="ico">&#8635;</span> Backup</a>
+  </nav>
+  <div class="foot">
+    <div id="save-indicator"><span class="dot"></span><span>{{ user.username }}</span></div>
+    <form method="post" action="{% url 'logout' %}" style="margin-top:8px;">
+      {% csrf_token %}
+      <button type="submit" class="btn secondary small" style="width:100%;">Sair</button>
+    </form>
+  </div>
+</div>
+<nav class="mobile-bottom-nav" aria-label="Navegação principal">
+  <a href="{% url 'dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}"><span class="ico">&#9673;</span><span>Início</span></a>
+  <a href="{% url 'receitas_list' %}" class="{% if active_nav == 'receitas' %}active{% endif %}"><span class="ico">&#8593;</span><span>Receitas</span></a>
+  <a href="{% url 'despesas_list' %}" class="{% if active_nav == 'despesas' %}active{% endif %}"><span class="ico">&#8595;</span><span>Despesas</span></a>
+  <a href="{% url 'contas_list' %}" class="{% if active_nav == 'contas' %}active{% endif %}"><span class="ico">&#9776;</span><span>Contas</span></a>
+  <button type="button" class="nav-menu-btn" onclick="toggleSidebar()" aria-label="Menu completo"><span class="ico">&#8942;</span><span>Menu</span></button>
+</nav>
+{% endif %}
+
+{% block body %}{% endblock %}
+
+<div id="overlay"><div id="modal"></div></div>
+<div id="toast"></div>
+
+<script>
+function toggleSidebar(force){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  if(!sb) return;
+  const shouldOpen = force!==undefined ? force : !sb.classList.contains('open');
+  sb.classList.toggle('open', shouldOpen);
+  if(ov) ov.classList.toggle('open', shouldOpen);
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+document.body.addEventListener('showToast', function(e){
+  const detail = e.detail;
+  showToast(typeof detail === 'string' ? detail : 'Salvo com sucesso.');
+});
+document.body.addEventListener('htmx:afterSwap', function(e){
+  if(e.detail.target.id === 'modal'){
+    document.getElementById('overlay').classList.add('open');
+  }
+});
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('modal').innerHTML = '';
+}
+document.getElementById('overlay').addEventListener('click', function(e){
+  if(e.target.id === 'overlay') closeModal();
+});
+document.querySelectorAll('#sidebar nav.menu a').forEach(function(link){
+  link.addEventListener('click', function(){ toggleSidebar(false); });
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

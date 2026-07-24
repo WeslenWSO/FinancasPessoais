@@ -1,0 +1,29 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Cartões de crédito</h2><p>Controle de fechamento, vencimento e limite</p></div>
+    <button class="btn" hx-get="{% url 'entity_form' 'cartao' %}" hx-target="#modal">+ Novo cartão</button>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Nome</th><th>Conta de pagamento</th><th class="num">Limite</th><th>Fecha dia</th><th>Vence dia</th><th></th></tr></thead>
+      <tbody>
+      {% for c in cartoes %}
+      <tr>
+        <td>{{ c.nome }}</td>
+        <td>{{ c.conta_pagamento.nome }}</td>
+        <td class="num">{{ c.limite|money }}</td>
+        <td>{{ c.dia_fechamento }}</td>
+        <td>{{ c.dia_vencimento }}</td>
+        <td class="actions-cell"><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'cartao' c.pk %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="empty-msg">Nenhum cartão cadastrado ainda.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

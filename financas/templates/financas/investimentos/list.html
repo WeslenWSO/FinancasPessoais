@@ -1,0 +1,31 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Investimentos</h2><p>Aportes e resgates</p></div>
+    <button class="btn" hx-get="{% url 'entity_form' 'investimento' %}" hx-target="#modal">+ Novo lançamento</button>
+  </div>
+  <div class="cards-row">
+    <div class="kpi"><div class="lbl">Total aportes</div><div class="val">{{ kpis.aportes|money }}</div></div>
+    <div class="kpi"><div class="lbl">Total resgates</div><div class="val">{{ kpis.resgates|money }}</div></div>
+    <div class="kpi"><div class="lbl">Posição atual</div><div class="val">{{ kpis.posicao|money }}</div></div>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Descrição</th><th>Tipo</th><th>Operação</th><th>Conta</th><th>Data</th><th class="num">Valor</th><th></th></tr></thead>
+      <tbody>
+      {% for i in items %}
+      <tr>
+        <td>{{ i.descricao }}</td><td>{{ i.tipo_investimento }}</td><td>{{ i.operacao }}</td><td>{{ i.conta.nome }}</td><td>{{ i.data|date:'d/m/Y' }}</td>
+        <td class="num">{{ i.valor|money }}</td>
+        <td><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'investimento' i.pk %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="empty-msg">Nenhum investimento cadastrado.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

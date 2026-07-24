@@ -1,0 +1,41 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Faturas</h2><p>Compras à vista e parceladas por competência</p></div>
+    <form class="toolbar" method="get">
+      <select name="cartao" onchange="this.form.submit()">
+        {% for c in cartoes %}
+        <option value="{{ c.pk }}" {% if cartao_id == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
+        {% endfor %}
+      </select>
+      <input type="month" name="mes" value="{{ ym }}" onchange="this.form.submit()">
+    </form>
+  </div>
+  {% if cartao %}
+  <div class="cards-row">
+    <div class="kpi"><div class="lbl">Cartão</div><div class="val" style="font-size:16px;">{{ cartao.nome }}</div></div>
+    <div class="kpi"><div class="lbl">Total da fatura</div><div class="val neg">{{ fatura.total|money }}</div></div>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Descrição</th><th>Categoria</th><th>Data compra</th><th>Parcela</th><th class="num">Valor</th></tr></thead>
+      <tbody>
+      {% for it in fatura.itens %}
+      <tr>
+        <td>{{ it.descricao }}</td><td>—</td><td>{{ it.data|slice:':10'|default:'—' }}</td>
+        <td>{% if it.parcelaAtual %}{{ it.parcelaAtual }}/{{ it.parcelaTotal }}{% else %}—{% endif %}</td>
+        <td class="num neg">{{ it.valor|money }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="empty-msg">Nenhum lançamento nesta fatura.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="panel"><p class="empty-msg">Cadastre um cartão para ver faturas.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

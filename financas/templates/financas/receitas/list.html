@@ -1,0 +1,43 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Receitas</h2><p>Receitas fixas e variáveis</p></div>
+    <button class="btn" hx-get="{% url 'entity_form' 'receita' %}" hx-target="#modal">+ Nova receita</button>
+  </div>
+  <form class="toolbar" method="get">
+    <input type="month" name="mes" value="{{ ym }}" onchange="this.form.submit()">
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);">
+      <input type="checkbox" name="todos" value="1" {% if todos %}checked{% endif %} onchange="this.form.submit()"> Ver todos os meses
+    </label>
+  </form>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Tipo</th><th>Data</th><th class="num">Valor</th><th></th></tr></thead>
+      <tbody>
+      {% if todos %}
+        {% for r in items %}
+        <tr>
+          <td>{{ r.descricao }}</td><td>{{ r.categoria.nome|default:'—' }}</td><td>{{ r.conta.nome }}</td><td>{{ r.tipo }}</td><td>{{ r.data|date:'d/m/Y'|default:'—' }}</td>
+          <td class="num pos">{{ r.valor|money }}</td>
+          <td><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'receita' r.pk %}" hx-target="#modal">Editar</button></td>
+        </tr>
+        {% empty %}<tr><td colspan="7" class="empty-msg">Nenhuma receita.</td></tr>{% endfor %}
+      {% else %}
+        {% for r in fixas %}
+        <tr><td>{{ r.descricao }}</td><td>—</td><td>—</td><td><span class="tag fixa">Fixa</span></td><td>{{ r.data|slice:':10' }}</td><td class="num pos">{{ r.valor|money }}</td><td></td></tr>
+        {% endfor %}
+        {% for r in variaveis %}
+        <tr>
+          <td>{{ r.descricao }}</td><td>{{ r.categoria.nome|default:'—' }}</td><td>{{ r.conta.nome }}</td><td><span class="tag variavel">Variável</span></td><td>{{ r.data|date:'d/m/Y' }}</td>
+          <td class="num pos">{{ r.valor|money }}</td>
+          <td><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'receita' r.pk %}" hx-target="#modal">Editar</button></td>
+        </tr>
+        {% empty %}{% if not fixas %}<tr><td colspan="7" class="empty-msg">Nenhuma receita neste mês.</td></tr>{% endif %}{% endfor %}
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

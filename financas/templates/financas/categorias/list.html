@@ -1,0 +1,39 @@
+{% extends 'financas/base.html' %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Categorias</h2><p>Organize receitas e despesas por categoria</p></div>
+  </div>
+  <div class="tabs">
+    <a href="?tab=receita" class="{% if tab == 'receita' %}active{% endif %}" style="padding:9px 14px;text-decoration:none;color:inherit;">Categorias de receita</a>
+    <a href="?tab=despesa" class="{% if tab == 'despesa' %}active{% endif %}" style="padding:9px 14px;text-decoration:none;color:inherit;">Categorias de despesa</a>
+  </div>
+  <div class="pagehead" style="margin-bottom:12px;">
+    <div></div>
+    <button class="btn" hx-get="{% if tab == 'receita' %}{% url 'entity_form' 'categoria-receita' %}{% else %}{% url 'entity_form' 'categoria-despesa' %}{% endif %}" hx-target="#modal">+ Nova categoria</button>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Cor</th><th>Nome</th><th></th></tr></thead>
+      <tbody>
+      {% for c in pais %}
+      <tr>
+        <td><span class="swatch" style="background:{{ c.cor }}"></span></td>
+        <td>{{ c.nome }}</td>
+        <td class="actions-cell"><button class="btn secondary small" hx-get="{% if tab == 'receita' %}{% url 'entity_form_edit' 'categoria-receita' c.pk %}{% else %}{% url 'entity_form_edit' 'categoria-despesa' c.pk %}{% endif %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% for sub in c.subcategorias.all %}
+      <tr>
+        <td><span class="swatch" style="background:{{ sub.cor }}"></span></td>
+        <td style="padding-left:22px;color:var(--muted);">&#8627; {{ sub.nome }}</td>
+        <td class="actions-cell"><button class="btn secondary small" hx-get="{% if tab == 'receita' %}{% url 'entity_form_edit' 'categoria-receita' sub.pk %}{% else %}{% url 'entity_form_edit' 'categoria-despesa' sub.pk %}{% endif %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% endfor %}
+      {% empty %}
+      <tr><td colspan="3" class="empty-msg">Nenhuma categoria cadastrada.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

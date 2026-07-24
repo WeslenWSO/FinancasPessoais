@@ -1,0 +1,128 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block title %}Dashboard — Finanças Pessoais{% endblock %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Dashboard</h2><p>Visão geral das suas finanças</p></div>
+    <form class="toolbar" method="get">
+      <a href="?mes=" class="btn secondary small" id="mes-prev">&#8249;</a>
+      <input type="month" name="mes" value="{{ ym }}" onchange="this.form.submit()">
+      <a href="?mes=" class="btn secondary small" id="mes-next">&#8250;</a>
+    </form>
+  </div>
+
+  <div class="cards-row">
+    <div class="kpi"><div class="lbl">Saldo total (hoje)</div><div class="val {{ data.saldo_total|money_class }}">{{ data.saldo_total|money }}</div></div>
+    <div class="kpi"><div class="lbl">Receitas do mês</div><div class="val pos">{{ data.total_receitas|money }}</div></div>
+    <div class="kpi"><div class="lbl">Despesas do mês</div><div class="val neg">{{ data.total_despesas|money }}</div></div>
+    <div class="kpi"><div class="lbl">Saldo do mês</div><div class="val {{ data.saldo_mes|money_class }}">{{ data.saldo_mes|money }}</div></div>
+    <div class="kpi"><div class="lbl">Investido (posição atual)</div><div class="val">{{ data.investido_atual|money }}</div></div>
+    <div class="kpi"><div class="lbl">Patrimônio (bens)</div><div class="val">{{ data.patrimonio_bens|money }}</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Receitas x Despesas (últimos 6 meses)</h3>
+      <div class="chart-wrap" style="height:240px;"><canvas id="chart-bars"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Despesas por categoria (mês)</h3>
+      <div class="chart-wrap" style="height:220px;"><canvas id="chart-donut"></canvas></div>
+      <div class="legend" id="donut-legend"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel compact-panel">
+      <h3>Faturas dos cartões (mês selecionado)</h3>
+      <table class="compact-table">
+        <thead><tr><th>Cartão</th><th>Status</th><th class="num">Valor</th></tr></thead>
+        <tbody>
+        {% for row in data.cartao_rows %}
+        <tr>
+          <td>{{ row.cartao.nome }}</td>
+          <td><span class="tag {{ row.status }}">{{ row.status }}</span></td>
+          <td class="num neg">{{ row.total|money }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="empty-msg">Nenhum cartão cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if data.limites %}
+    <div class="panel compact-panel">
+      <h3>Limites disponíveis</h3>
+      <table class="compact-table">
+        <thead><tr><th>Cartão</th><th class="num">Limite</th><th class="num">Disponível</th></tr></thead>
+        <tbody>
+        {% for L in data.limites %}
+        <tr>
+          <td>{{ L.cartao.nome }}</td>
+          <td class="num">{{ L.limite|money }}</td>
+          <td class="num">{{ L.disponivel|money }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if data.orcamentos %}
+  <div class="panel compact-panel">
+    <h3>Orçamento por categoria</h3>
+    <table class="compact-table">
+      <thead><tr><th>Categoria</th><th class="num">Planejado</th><th class="num">Gasto</th></tr></thead>
+      <tbody>
+      {% for o in data.orcamentos %}
+      <tr>
+        <td>{{ o.orcamento.categoria.nome }}</td>
+        <td class="num">{{ o.planejado|money }}</td>
+        <td class="num {% if o.estourou %}neg{% endif %}">{{ o.gasto|money }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function shiftMonthVal(ym, delta){
+  let [y,m]=ym.split('-').map(Number); m+=delta;
+  y+=Math.floor((m-1)/12); m=((m-1)%12+12)%12+1;
+  return y+'-'+String(m).padStart(2,'0');
+}
+const labels = {{ chart_labels_json|safe }};
+const receitas = {{ serie_receita_json|safe }};
+const despesas = {{ serie_despesa_json|safe }};
+const donut = {{ donut_data_json|safe }};
+document.getElementById('mes-prev').href = '?mes=' + shiftMonthVal('{{ ym }}', -1);
+document.getElementById('mes-next').href = '?mes=' + shiftMonthVal('{{ ym }}', 1);
+new Chart(document.getElementById('chart-bars'), {
+  type: 'bar',
+  data: {
+    labels: labels.map(l=>l.slice(2).replace('-','/')),
+    datasets: [
+      {label:'Receitas', data: receitas, backgroundColor:'#059669'},
+      {label:'Despesas', data: despesas, backgroundColor:'#e11d48'}
+    ]
+  },
+  options: {responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true}}}
+});
+new Chart(document.getElementById('chart-donut'), {
+  type: 'doughnut',
+  data: {
+    labels: donut.map(d=>d.label),
+    datasets: [{data: donut.map(d=>d.value), backgroundColor: donut.map(d=>d.color)}]
+  },
+  options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+});
+document.getElementById('donut-legend').innerHTML = donut.map(d=>
+  `<div class="item"><span class="swatch" style="background:${d.color}"></span>${d.label} — R$ ${d.value.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`
+).join('') || '<span style="color:var(--muted)">Sem despesas no período.</span>';
+</script>
+{% endblock %}

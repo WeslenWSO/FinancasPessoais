@@ -1,0 +1,47 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Despesas</h2><p>Despesas fixas e variáveis, à vista ou parceladas no cartão</p></div>
+    <button class="btn" hx-get="{% url 'entity_form' 'despesa' %}" hx-target="#modal">+ Nova despesa</button>
+  </div>
+  <form class="toolbar" method="get">
+    <input type="month" name="mes" value="{{ ym }}" onchange="this.form.submit()">
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);">
+      <input type="checkbox" name="todos" value="1" {% if todos %}checked{% endif %} onchange="this.form.submit()"> Ver todos os meses
+    </label>
+  </form>
+  {% if not todos %}
+  <div class="cards-row">
+    <div class="kpi"><div class="lbl">Fixas</div><div class="val neg">{{ kpis.fixas|money }}</div></div>
+    <div class="kpi"><div class="lbl">Variáveis (conta)</div><div class="val neg">{{ kpis.variaveis|money }}</div></div>
+    <div class="kpi"><div class="lbl">Faturas cartão</div><div class="val neg">{{ kpis.faturas|money }}</div></div>
+    <div class="kpi"><div class="lbl">Total</div><div class="val neg">{{ kpis.total|money }}</div></div>
+  </div>
+  {% endif %}
+  <div class="panel">
+    <table>
+      <thead><tr><th>Descrição</th><th>Categoria</th><th>Pagamento</th><th>Tipo</th><th>Data</th><th class="num">Valor</th><th></th></tr></thead>
+      <tbody>
+      {% for d in fixas %}
+      <tr><td>{{ d.descricao }}</td><td>—</td><td>Conta</td><td><span class="tag fixa">Fixa</span></td><td>{{ d.data|slice:':10' }}</td><td class="num neg">{{ d.valor|money }}</td><td></td></tr>
+      {% endfor %}
+      {% for d in variaveis_conta %}
+      <tr>
+        <td>{{ d.descricao }}</td><td>{{ d.categoria.nome|default:'—' }}</td><td>{{ d.conta.nome|default:'—' }}</td><td><span class="tag variavel">Variável</span></td><td>{{ d.data|date:'d/m/Y' }}</td>
+        <td class="num neg">{{ d.valor|money }}</td>
+        <td><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'despesa' d.pk %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% endfor %}
+      {% for g in fatura_groups %}
+      <tr class="fatura-group-row"><td colspan="6"><strong>Fatura: {{ g.cartao.nome }}</strong> ({{ g.itens|length }} itens)</td><td class="num neg">{{ g.total|money }}</td></tr>
+      {% for it in g.itens %}
+      <tr class="fatura-item-row"><td>{{ it.descricao }}</td><td>—</td><td>{{ g.cartao.nome }}</td><td>Cartão</td><td>{{ it.data|slice:':10'|default:'—' }}</td><td class="num neg">{{ it.valor|money }}</td><td></td></tr>
+      {% endfor %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

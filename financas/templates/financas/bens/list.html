@@ -1,0 +1,33 @@
+{% extends 'financas/base.html' %}
+{% load financas_extras %}
+{% block body %}
+<div id="main">
+  <div class="pagehead">
+    <div><h2>Bens</h2><p>Terrenos, imóveis, veículos — registro de patrimônio</p></div>
+    <button class="btn" hx-get="{% url 'entity_form' 'bem' %}" hx-target="#modal">+ Novo bem</button>
+  </div>
+  <div class="cards-row">
+    <div class="kpi"><div class="lbl">Quantidade</div><div class="val">{{ kpis.quantidade }}</div></div>
+    <div class="kpi"><div class="lbl">Valor aquisição</div><div class="val">{{ kpis.aquisicao|money }}</div></div>
+    <div class="kpi"><div class="lbl">Valor estimado</div><div class="val">{{ kpis.estimado|money }}</div></div>
+    <div class="kpi"><div class="lbl">Valorização</div><div class="val {{ kpis.valorizacao|money_class }}">{{ kpis.valorizacao|money }}</div></div>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Descrição</th><th>Tipo</th><th>Aquisição</th><th class="num">Valor aquisição</th><th class="num">Valor estimado</th><th></th></tr></thead>
+      <tbody>
+      {% for b in bens %}
+      <tr>
+        <td>{{ b.descricao }}</td><td>{{ b.tipo }}</td><td>{{ b.data_aquisicao|date:'d/m/Y'|default:'—' }}</td>
+        <td class="num">{{ b.valor_aquisicao|money }}</td>
+        <td class="num">{{ b.valor_estimado_atual|default:b.valor_aquisicao|money }}</td>
+        <td><button class="btn secondary small" hx-get="{% url 'entity_form_edit' 'bem' b.pk %}" hx-target="#modal">Editar</button></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="empty-msg">Nenhum bem cadastrado.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
