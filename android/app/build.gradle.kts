@@ -15,6 +15,22 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         buildConfigField("String", "DEFAULT_API_URL", "\"http://10.0.2.2:8000/\"")
+        buildConfigField(
+            "String",
+            "PRODUCTION_API_URL",
+            "\"https://financas-pessoais.onrender.com/\"",
+        )
+    }
+
+    buildTypes {
+        release {
+            buildConfigField(
+                "String",
+                "DEFAULT_API_URL",
+                "\"https://financas-pessoais.onrender.com/\"",
+            )
+            isMinifyEnabled = false
+        }
     }
 
     buildFeatures {

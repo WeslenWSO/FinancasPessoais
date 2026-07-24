@@ -31,8 +31,11 @@ python manage.py runserver 0.0.0.0:8000
 |----------|------------|
 | Emulador Android | `http://10.0.2.2:8000/` |
 | Celular físico (mesma rede) | `http://SEU_IP_LOCAL:8000/` |
+| Produção (Render) | `https://financas-pessoais.onrender.com/` |
 
 Na tela de login, toque em **Configurar servidor** para alterar a URL.
+
+O build **release** já usa a URL do Render por padrão (`DEFAULT_API_URL`). O build **debug** usa o emulador local.
 
 ## 4. Login
 

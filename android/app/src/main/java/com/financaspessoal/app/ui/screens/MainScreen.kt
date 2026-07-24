@@ -77,7 +77,7 @@ private fun DashboardTab(viewModel: AppViewModel) {
 
     when {
         state.loading -> LoadingBox()
-        state.error != null -> ErrorBox(state.error!!) { viewModel.loadDashboard() }
+        state.error != null -> ErrorBox(state.error!!, onRetry = { viewModel.loadDashboard() })
         state.data != null -> {
             val d = state.data!!
             LazyColumn(
@@ -220,11 +220,14 @@ private fun PrevisaoTab(viewModel: AppViewModel) {
 private fun <T> EntityList(
     state: com.financaspessoal.app.ui.UiState<T>,
     onRetry: () -> Unit,
-    content: @Composable androidx.compose.foundation.lazy.LazyListScope.(T) -> Unit,
+    content: androidx.compose.foundation.lazy.LazyListScope.(T) -> Unit,
 ) {
     when {
         state.loading -> LoadingBox()
         state.error != null -> ErrorBox(state.error!!, onRetry)
-        state.data != null -> LazyColumn(content = { content(state.data!!) })
+        state.data != null -> {
+            val data = state.data!!
+            LazyColumn { content(data) }
+        }
     }
 }

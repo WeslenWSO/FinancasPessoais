@@ -64,3 +64,61 @@ python manage.py test financas
 - `financas/views/` — interface web
 - `financas/api/` — REST API (DRF)
 - `financas/templates/` — templates Django + HTMX
+
+## Deploy no Render (GitHub → Render)
+
+Fluxo: **Cursor** edita o código → **git push** para GitHub → **Render** faz deploy automático.
+
+### 1. Conectar GitHub ao Render
+
+1. Crie conta em [render.com](https://render.com)
+2. Conecte sua conta **GitHub**
+3. Autorize o repositório `WeslenWSO/FinancasPessoais`
+4. **New → Blueprint** e selecione o repo (usa o arquivo [`render.yaml`](render.yaml))
+
+### 2. O que o Render cria
+
+- **Web Service** `financas-pessoais` — Django com Gunicorn
+- **PostgreSQL** `financas-db` — banco persistente (não use SQLite em produção)
+
+Comando de start:
+
+```bash
+gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+### 3. Variáveis de ambiente (automáticas via Blueprint)
+
+| Variável | Descrição |
+|----------|-----------|
+| `SECRET_KEY` | Gerada automaticamente |
+| `DEBUG` | `False` |
+| `DATABASE_URL` | Vinculada ao Postgres |
+| `RENDER_EXTERNAL_HOSTNAME` | Definida pelo Render (ALLOWED_HOSTS) |
+
+Opcionais no painel do Render:
+
+- `CORS_ALLOWED_ORIGINS` — URLs extras separadas por vírgula
+- `CSRF_TRUSTED_ORIGINS` — ex.: `https://financas-pessoais.onrender.com`
+
+### 4. Fluxo no Cursor
+
+```powershell
+git add .
+git commit -m "sua mensagem"
+git push origin main
+```
+
+Cada push na branch `main` dispara um novo deploy. Acompanhe logs no **Render Dashboard**.
+
+### 5. Pós-deploy
+
+1. Crie um superusuário via **Render Shell**:
+   ```bash
+   python manage.py createsuperuser
+   ```
+2. Acesse a URL: `https://financas-pessoais.onrender.com`
+3. No **app Android**, use **Configurar servidor** com a URL HTTPS do Render
+
+> **Plano free:** o serviço dorme após inatividade; a primeira requisição pode levar ~50s.
+
