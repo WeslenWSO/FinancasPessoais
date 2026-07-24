@@ -19,7 +19,7 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,10.0.2.2').split(',')
+    for host in os.environ.get('ALLOWED_HOSTS', 'localhost,192.168.1.2,127.0.0.1,10.0.2.2').split(',')
     if host.strip()
 ]
 
@@ -100,7 +100,7 @@ STATICFILES_DIRS = [BASE_DIR / 'financas' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
 
