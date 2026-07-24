@@ -6,7 +6,7 @@
 |-------|--------|
 | **Root Directory** | *(vazio)* |
 | **Build Command** | `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate` |
-| **Start Command** | `python manage.py migrate --noinput && gunicorn wsgi:application --bind 0.0.0.0:$PORT` |
+| **Start Command** | `./start.sh` ou `python manage.py migrate --noinput && gunicorn wsgi:application --bind 0.0.0.0:$PORT` |
 | **PYTHON_VERSION** | `3.12.0` |
 
 ## PostgreSQL (obrigatório)
@@ -24,6 +24,28 @@ Sem `DATABASE_URL`, o Django usa SQLite e as tabelas não existem → erro `no s
 |-------|--------|
 | `DEBUG` | `False` |
 | `SECRET_KEY` | *(gerar string longa)* |
+| `DJANGO_SUPERUSER_USERNAME` | `Admin` |
+| `DJANGO_SUPERUSER_PASSWORD` | *(sua senha — ex.: 170691)* |
+| `DJANGO_SUPERUSER_EMAIL` | `admin@financaspessoal.local` |
+
+> Defina `DJANGO_SUPERUSER_*` no painel do Render (Environment). **Não** commite a senha no Git.
+
+## Criar admin manualmente (Render Shell)
+
+Se preferir criar agora, no **Shell** do serviço:
+
+```bash
+export DJANGO_SUPERUSER_USERNAME=Admin
+export DJANGO_SUPERUSER_PASSWORD=170691
+export DJANGO_SUPERUSER_EMAIL=admin@financaspessoal.local
+python manage.py ensure_superuser
+```
+
+Ou interativo:
+
+```bash
+python manage.py createsuperuser
+```
 
 ## Deploy
 
