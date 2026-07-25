@@ -14,20 +14,32 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-        buildConfigField("String", "DEFAULT_API_URL", "\"http://10.0.2.2:8000/\"")
+        buildConfigField("String", "DEFAULT_API_URL", "\"https://financaspessoais-eloo.onrender.com/\"")
+        buildConfigField(
+            "String",
+            "LOCAL_API_URL",
+            "\"http://192.168.1.2:8000/\"",
+        )
         buildConfigField(
             "String",
             "PRODUCTION_API_URL",
-            "\"https://financas-pessoais.onrender.com/\"",
+            "\"https://financaspessoais-eloo.onrender.com/\"",
         )
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "DEFAULT_API_URL",
+                "\"http://192.168.1.2:8000/\"",
+            )
+        }
         release {
             buildConfigField(
                 "String",
                 "DEFAULT_API_URL",
-                "\"https://financas-pessoais.onrender.com/\"",
+                "\"https://financaspessoais-eloo.onrender.com/\"",
             )
             isMinifyEnabled = false
         }

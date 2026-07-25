@@ -116,7 +116,7 @@ fun LoginScreen(viewModel: AppViewModel) {
                 Text("Configurar servidor", color = Color.White.copy(alpha = 0.85f))
             }
             Text(
-                "Emulador: http://10.0.2.2:8000/\nCelular: http://IP_DO_PC:8000/\nProdução: ${com.financaspessoal.app.BuildConfig.PRODUCTION_API_URL}",
+                "Produção: ${com.financaspessoal.app.BuildConfig.PRODUCTION_API_URL}\nLocal: ${com.financaspessoal.app.BuildConfig.LOCAL_API_URL}",
                 color = Color.White.copy(alpha = 0.55f),
                 fontSize = 11.sp,
                 modifier = Modifier.padding(top = 8.dp),

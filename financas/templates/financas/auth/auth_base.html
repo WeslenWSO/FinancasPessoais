@@ -13,6 +13,17 @@
 <body class="auth-page">
   <div class="auth-bg" style="background-image:url('{% static 'financas/img/login-bg.png' %}');"></div>
   <div class="auth-bg-overlay"></div>
-  {% block content %}{% endblock %}
+  <div class="auth-ios-device">
+    <div class="auth-ios-status" aria-hidden="true">
+      <span class="auth-ios-status-time">9:41</span>
+      <span class="auth-ios-status-icons">
+        <span class="auth-ios-signal"></span>
+        <span class="auth-ios-wifi"></span>
+        <span class="auth-ios-battery"></span>
+      </span>
+    </div>
+    {% block content %}{% endblock %}
+    <div class="auth-ios-home-indicator" aria-hidden="true"></div>
+  </div>
 </body>
 </html>
