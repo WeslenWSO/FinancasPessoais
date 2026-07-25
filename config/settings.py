@@ -11,12 +11,19 @@ from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+_IS_RENDER = os.environ.get('RENDER', '').lower() in ('true', '1', 'yes') or bool(
+    os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+)
+
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-2@5)4i%qn32uy0=d7u)o(76bi5y=uqj^@c8n2%qakn2)w=bh--',
 )
 
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+if _IS_RENDER and 'DEBUG' not in os.environ:
+    DEBUG = False
+else:
+    DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -77,9 +84,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 if not DEBUG and not os.environ.get('DATABASE_URL'):
-    raise ImproperlyConfigured(
-        'Defina DATABASE_URL no Render (PostgreSQL). SQLite não é suportado em produção.',
-    )
+    if _IS_RENDER:
+        import logging
+
+        logging.getLogger(__name__).warning(
+            'RENDER: DATABASE_URL não definida — usando SQLite (dados não persistem entre deploys). '
+            'Crie um PostgreSQL no Dashboard e defina DATABASE_URL.',
+        )
+    else:
+        raise ImproperlyConfigured(
+            'Defina DATABASE_URL (PostgreSQL). SQLite não é suportado em produção.',
+        )
 
 DATABASES = {
     'default': dj_database_url.config(
